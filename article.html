@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Woodley Leaves</title>
+<meta name="description" content="The Woodley Leaves — Maret School's student newspaper.">
+<meta property="og:title" content="The Woodley Leaves">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="The Woodley Leaves">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-inner"><div><a href="#">Subscribe</a></div><div></div></div></div>
+
+<div class="masthead">
+  <h1><a href="index.html">The Woodley Leaves</a></h1>
+  <div class="dateline">MARET SCHOOL</div>
+</div>
+
+<nav class="sectionnav">
+  <div class="sectionnav-inner" id="section-nav-inner">
+    <a href="index.html">Home</a>
+    <a href="news.html" data-section="News">News</a>
+    <a href="features.html" data-section="Features">Features</a>
+    <a href="opinion.html" data-section="Op-Ed">Op-Ed</a>
+    <a href="style.html" data-section="Style">Style</a>
+    <a href="centerspread.html" data-section="Puzzles">Centerspread</a>
+    <a href="sports.html" data-section="Sports">Sports</a>
+  </div>
+</nav>
+
+<main class="container">
+  <article class="article-page" id="article-root">
+    <div id="article-not-found" style="display:none;">
+      <h1>Article not found</h1>
+      <p>We couldn't find that story. <a href="index.html">Return home</a>.</p>
+    </div>
+
+    <div id="article-body" style="display:none;">
+      <div class="kicker" id="art-kicker"></div>
+      <h1 id="art-title"></h1>
+      <p class="deck" id="art-deck"></p>
+      <div class="byline" id="art-byline"></div>
+
+      <div class="article-actions">
+        <button class="bookmark-btn" id="bookmark-btn">
+          <span class="star">☆</span><span class="label">Save to bookmarks</span>
+        </button>
+        <div class="share-row">
+          <button class="share-btn" data-action="copy" title="Copy link">Copy link</button>
+          <a class="share-btn" id="share-email" title="Share by email">Email</a>
+        </div>
+      </div>
+
+      <div id="art-media"></div>
+      <div class="caption" id="art-caption"></div>
+
+      <div id="art-prose"></div>
+    </div>
+  </article>
+</main>
+
+<footer>© 2026 The Woodley Leaves · Maret School Student Publication<br>Online Editor-in-Chief: <a href="mailto:arielp2027@maret.org">arielp2027@maret.org</a> · Online Managing Editor: <a href="mailto:farrynb2027@maret.org">farrynb2027@maret.org</a></footer>
+
+<script src="articles.js"></script>
+<script src="articles-store.js"></script>
+<script src="auth.js"></script>
+<script src="script.js"></script>
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id") || "debate-regional-2026-04-17";  // default
+
+  const a = WLArticles.getById(id);
+
+  if (!a) {
+    document.getElementById("article-not-found").style.display = "block";
+    document.title = "Article not found — The Woodley Leaves";
+    return;
+  }
+
+  // Render
+  document.getElementById("article-body").style.display = "block";
+  document.title = `${a.title} — The Woodley Leaves`;
+  // Update meta tags for sharing
+  document.querySelector('meta[name="description"]').setAttribute("content", a.deck);
+  document.querySelector('meta[property="og:title"]').setAttribute("content", a.title);
+
+  document.getElementById("art-kicker").textContent = a.section;
+  document.getElementById("art-title").textContent = a.title;
+  document.getElementById("art-deck").textContent = a.deck;
+  const roleStr = a.role ? ` · ${a.role}` : "";
+  document.getElementById("art-byline").textContent = `By ${a.byline}${roleStr} · ${a.date}`;
+
+  // Render media (video first, then photo, then default placeholder)
+  const mediaEl = document.getElementById("art-media");
+  const captionEl = document.getElementById("art-caption");
+  function parseVideo(url) {
+    if (!url) return null;
+    const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]+)/);
+    if (yt) return { type: "youtube", id: yt[1] };
+    const vm = url.match(/vimeo\.com\/(\d+)/);
+    if (vm) return { type: "vimeo", id: vm[1] };
+    return null;
+  }
+  if (a.video) {
+    const v = parseVideo(a.video);
+    if (v && v.type === "youtube") {
+      mediaEl.innerHTML = `<div class="video-embed"><iframe src="https://www.youtube.com/embed/${v.id}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    } else if (v && v.type === "vimeo") {
+      mediaEl.innerHTML = `<div class="video-embed"><iframe src="https://player.vimeo.com/video/${v.id}" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`;
+    } else {
+      mediaEl.innerHTML = `<div class="caption" style="color:#b8002a;">Couldn't recognize the video URL. Use a YouTube or Vimeo link.</div>`;
+    }
+    captionEl.textContent = a.photoCaption || "";
+  } else if (a.photo) {
+    const img = document.createElement("img");
+    img.className = "article-photo";
+    img.src = a.photo;
+    img.alt = a.title;
+    mediaEl.appendChild(img);
+    captionEl.textContent = a.photoCaption || "";
+  } else {
+    mediaEl.innerHTML = `<div class="photo wide"></div>`;
+    captionEl.textContent = "";
+  }
+
+  const proseEl = document.getElementById("art-prose");
+  proseEl.innerHTML = "";
+  a.body.forEach(para => {
+    const p = document.createElement("p");
+    p.textContent = para;
+    proseEl.appendChild(p);
+  });
+
+  // Highlight section in nav
+  document.querySelectorAll("#section-nav-inner a").forEach(link => {
+    if (link.dataset.section === a.section) link.classList.add("active");
+  });
+
+  // Bookmark button
+  const btn = document.getElementById("bookmark-btn");
+  function refreshBookmark() {
+    const saved = window.WLAuth && WLAuth.isBookmarked(id);
+    btn.classList.toggle("saved", !!saved);
+    btn.querySelector(".label").textContent = saved ? "Saved" : "Save to bookmarks";
+    btn.querySelector(".star").textContent = saved ? "★" : "☆";
+  }
+  btn.addEventListener("click", () => {
+    const result = WLAuth.toggleBookmark(id, a.title, a.section);
+    if (result.needsAuth) { WLAuth.showSignIn(); return; }
+    refreshBookmark();
+  });
+  document.addEventListener("wl-auth-change", refreshBookmark);
+  refreshBookmark();
+
+  // Share buttons
+  const url = location.href;
+  document.querySelector('.share-btn[data-action="copy"]').addEventListener("click", async (e) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      e.target.textContent = "Copied!";
+      setTimeout(() => { e.target.textContent = "Copy link"; }, 1500);
+    } catch {
+      e.target.textContent = "Press Cmd/Ctrl+C";
+    }
+  });
+  const emailBtn = document.getElementById("share-email");
+  emailBtn.href = `mailto:?subject=${encodeURIComponent(a.title)}&body=${encodeURIComponent(a.deck + "\n\n" + url)}`;
+})();
+</script>
+</body>
+</html>
