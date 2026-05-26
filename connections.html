@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Connections — The Centerspread</title>
+<meta name="description" content="A Connections puzzle from the May 2026 senior-edition centerspread of The Woodley Leaves, by Anna Puryear.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="centerspread.css" />
+<style>
+  .cs-back { font-family: Georgia, serif; font-size: 14px; color: #555; text-decoration: none; display: inline-block; margin: 8px 0 24px; }
+  .cs-back:hover { color: var(--ink, #111); }
+
+  .conn-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 18px 0 24px;
+  }
+  .conn-tile {
+    background: #f7f3e8;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 14px 8px;
+    text-align: center;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    user-select: none;
+  }
+  @media (max-width: 540px) {
+    .conn-grid { gap: 6px; }
+    .conn-tile { padding: 12px 4px; font-size: 12px; }
+  }
+
+  .play-btn {
+    display: inline-block;
+    background: var(--accent, #2e7d32);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 8px 0 24px;
+  }
+  .play-btn:hover { opacity: 0.9; text-decoration: none; }
+
+  .conn-reveal {
+    margin-top: 14px;
+    border-top: 1px solid #e0d6c4;
+    padding-top: 14px;
+  }
+  .conn-reveal summary {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    padding: 6px 0;
+  }
+  .conn-reveal[open] summary { color: #1a1a1a; font-style: normal; }
+  .conn-solution-row {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border-radius: 6px;
+  }
+  .conn-solution-row.cat-1 { background: #fff4d2; }
+  .conn-solution-row.cat-2 { background: #d8efd8; }
+  .conn-solution-row.cat-3 { background: #ffd9c4; }
+  .conn-solution-row.cat-4 { background: #d8e6f4; }
+  .conn-solution-title {
+    font-family: "Old Standard TT", Georgia, serif;
+    font-weight: bold;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+  .conn-solution-words {
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: #1a1a1a;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-ornament left" aria-hidden="true"><svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><path d="M 4 15 Q 16 4 34 10 Q 48 14 52 22 Q 40 26 22 20 Q 10 16 4 15 Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M 6 16 Q 26 19 52 22" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M 16 10 L 20 17" stroke="currentColor" stroke-width="0.8"/><path d="M 24 9 L 28 18" stroke="currentColor" stroke-width="0.8"/><path d="M 34 11 L 36 20" stroke="currentColor" stroke-width="0.8"/></svg></div>
+  <div class="masthead-ornament right" aria-hidden="true"><svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><path d="M 4 15 Q 16 4 34 10 Q 48 14 52 22 Q 40 26 22 20 Q 10 16 4 15 Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M 6 16 Q 26 19 52 22" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M 16 10 L 20 17" stroke="currentColor" stroke-width="0.8"/><path d="M 24 9 L 28 18" stroke="currentColor" stroke-width="0.8"/><path d="M 34 11 L 36 20" stroke="currentColor" stroke-width="0.8"/></svg></div>
+  <h1><a href="index.html">The Woodley Leaves</a></h1>
+  <div class="dateline">TUESDAY, MAY 26, 2026 &nbsp;·&nbsp; MARET SCHOOL · SENIOR EDITION</div>
+</div>
+
+<main class="container">
+  <a class="cs-back" href="index.html">← Back to the Centerspread</a>
+
+  <article class="print-piece">
+    <div class="print-piece-head">
+      <div class="kicker">Game</div>
+      <h3>Connections</h3>
+      <div class="byline">By Anna Puryear</div>
+    </div>
+
+    <p class="print-piece-intro">Sixteen words. Four hidden categories. Group them correctly to win — full playable version below.</p>
+
+    <div class="conn-grid" aria-label="The 16 words to group">
+      <div class="conn-tile">Blue</div>
+      <div class="conn-tile">6 Minute</div>
+      <div class="conn-tile">Corn</div>
+      <div class="conn-tile">Cap</div>
+      <div class="conn-tile">Cran</div>
+      <div class="conn-tile">Extra</div>
+      <div class="conn-tile">Culture</div>
+      <div class="conn-tile">Doh</div>
+      <div class="conn-tile">Rasp</div>
+      <div class="conn-tile">Si</div>
+      <div class="conn-tile">Sickle</div>
+      <div class="conn-tile">Ling</div>
+      <div class="conn-tile">Straw</div>
+      <div class="conn-tile">The Green</div>
+      <div class="conn-tile">Tart</div>
+      <div class="conn-tile">Mo</div>
+    </div>
+
+    <a class="play-btn" href="https://connections.swellgarfo.com/game/-OsPAIgZ75UpV1WTMeAs" target="_blank" rel="noopener noreferrer">Play the puzzle →</a>
+
+    <details class="conn-reveal">
+      <summary>Reveal the solution</summary>
+      <div class="conn-solution-row cat-1">
+        <div class="conn-solution-title">___Berry</div>
+        <div class="conn-solution-words">Blue · Cran · Rasp · Straw</div>
+      </div>
+      <div class="conn-solution-row cat-2">
+        <div class="conn-solution-title">___Mile</div>
+        <div class="conn-solution-words">6 Minute · Extra · Si · The Green</div>
+      </div>
+      <div class="conn-solution-row cat-3">
+        <div class="conn-solution-title">Pop___</div>
+        <div class="conn-solution-words">Corn · Culture · Sickle · Tart</div>
+      </div>
+      <div class="conn-solution-row cat-4">
+        <div class="conn-solution-title">(K)NE(E)</div>
+        <div class="conn-solution-words">Cap · Doh · Ling · Mo</div>
+      </div>
+    </details>
+  </article>
+</main>
+
+<footer>© 2026 The Woodley Leaves · Maret School Student Publication<br>Online Editor-in-Chief: <a href="mailto:arielp2027@maret.org">arielp2027@maret.org</a> · Online Managing Editor: <a href="mailto:farrynb2027@maret.org">farrynb2027@maret.org</a></footer>
+
+</body>
+</html>
