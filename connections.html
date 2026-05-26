@@ -14,79 +14,136 @@
   .cs-back { font-family: Georgia, serif; font-size: 14px; color: #555; text-decoration: none; display: inline-block; margin: 8px 0 24px; }
   .cs-back:hover { color: var(--ink, #111); }
 
+  .conn-game { margin: 18px 0 8px; }
+
+  .conn-solved-rows { margin: 0 0 10px; }
+  .conn-solved-row {
+    margin: 6px 0;
+    padding: 12px 14px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .conn-solved-row.cat-1 { background: #fff4d2; }
+  .conn-solved-row.cat-2 { background: #d8efd8; }
+  .conn-solved-row.cat-3 { background: #ffd9c4; }
+  .conn-solved-row.cat-4 { background: #d8e6f4; }
+  .conn-solved-row.is-revealed { opacity: 0.9; outline: 1px dashed rgba(0,0,0,0.15); }
+  .conn-solved-name {
+    font-family: "Old Standard TT", Georgia, serif;
+    font-weight: bold;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    color: #1a1a1a;
+  }
+  .conn-solved-words {
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: #1a1a1a;
+  }
+
   .conn-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    margin: 18px 0 24px;
+    margin: 14px 0;
   }
   .conn-tile {
     background: #f7f3e8;
     border: 1px solid #ddd;
     border-radius: 6px;
-    padding: 14px 8px;
+    padding: 16px 6px;
+    min-height: 56px;
     text-align: center;
     font-family: Georgia, serif;
     font-size: 14px;
     color: #1a1a1a;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    cursor: pointer;
     user-select: none;
+    transition: background 120ms ease, color 120ms ease, transform 80ms ease;
+  }
+  .conn-tile:hover:not(:disabled) { background: #ede5d3; }
+  .conn-tile:disabled { cursor: default; opacity: 0.6; }
+  .conn-tile.is-selected {
+    background: #5a5a5a;
+    color: #fff;
+    border-color: #444;
+  }
+  .conn-tile.is-shake { animation: conn-shake 0.45s ease; }
+  @keyframes conn-shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-4px); }
+    40%      { transform: translateX(4px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(3px); }
   }
   @media (max-width: 540px) {
     .conn-grid { gap: 6px; }
-    .conn-tile { padding: 12px 4px; font-size: 12px; }
+    .conn-tile { padding: 14px 4px; font-size: 12px; min-height: 50px; }
   }
 
-  .play-btn {
+  .conn-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0 4px;
+    font-family: Georgia, serif;
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+  .conn-mistakes-label { color: #555; }
+  .conn-hearts { display: inline-block; margin-left: 6px; }
+  .conn-heart {
     display: inline-block;
-    background: var(--accent, #2e7d32);
-    color: #fff;
-    padding: 12px 22px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-family: Georgia, serif;
+    margin: 0 2px;
+    color: #c44;
     font-size: 14px;
-    font-weight: bold;
-    margin: 8px 0 24px;
+    transition: opacity 220ms ease, transform 220ms ease;
   }
-  .play-btn:hover { opacity: 0.9; text-decoration: none; }
-
-  .conn-reveal {
-    margin-top: 14px;
-    border-top: 1px solid #e0d6c4;
-    padding-top: 14px;
-  }
-  .conn-reveal summary {
-    font-family: Georgia, serif;
+  .conn-heart[data-active="false"] { opacity: 0.18; transform: scale(0.85); }
+  .conn-message {
     font-style: italic;
-    font-size: 14px;
     color: #555;
-    cursor: pointer;
-    padding: 6px 0;
+    min-height: 1.2em;
   }
-  .conn-reveal[open] summary { color: #1a1a1a; font-style: normal; }
-  .conn-solution-row {
-    margin: 14px 0;
-    padding: 12px 14px;
-    border-radius: 6px;
+  .conn-message[data-kind="warn"] { color: #b78600; font-style: normal; }
+  .conn-message[data-kind="win"]  { color: #2e7d32; font-style: normal; font-weight: bold; }
+  .conn-message[data-kind="lose"] { color: #c44; font-style: normal; font-weight: bold; }
+
+  .conn-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0 6px;
+    flex-wrap: wrap;
   }
-  .conn-solution-row.cat-1 { background: #fff4d2; }
-  .conn-solution-row.cat-2 { background: #d8efd8; }
-  .conn-solution-row.cat-3 { background: #ffd9c4; }
-  .conn-solution-row.cat-4 { background: #d8e6f4; }
-  .conn-solution-title {
-    font-family: "Old Standard TT", Georgia, serif;
-    font-weight: bold;
-    font-size: 16px;
-    letter-spacing: 0.3px;
-    margin-bottom: 4px;
-  }
-  .conn-solution-words {
+  .conn-btn {
     font-family: Georgia, serif;
     font-size: 14px;
+    padding: 8px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    border: 1px solid #1a1a1a;
+    background: transparent;
     color: #1a1a1a;
+    transition: background 120ms ease, color 120ms ease, opacity 120ms ease;
   }
+  .conn-btn:hover:not(:disabled) { background: #1a1a1a; color: #fff; }
+  .conn-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .conn-btn-primary { background: #1a1a1a; color: #fff; }
+  .conn-btn-primary:hover:not(:disabled) { background: #000; }
+
+  .conn-secondary-link {
+    text-align: center;
+    margin: 22px 0 0;
+    font-family: Georgia, serif;
+    font-size: 13px;
+  }
+  .conn-secondary-link a { color: #555; }
 </style>
 </head>
 <body>
@@ -108,52 +165,33 @@
       <div class="byline">By Anna Puryear</div>
     </div>
 
-    <p class="print-piece-intro">Sixteen words. Four hidden categories. Group them correctly to win — full playable version below.</p>
+    <p class="print-piece-intro">Tap four tiles you think share a category, then hit Submit. Find all four groups — but you only get five mistakes before the answers are revealed.</p>
 
-    <div class="conn-grid" aria-label="The 16 words to group">
-      <div class="conn-tile">Blue</div>
-      <div class="conn-tile">6 Minute</div>
-      <div class="conn-tile">Corn</div>
-      <div class="conn-tile">Cap</div>
-      <div class="conn-tile">Cran</div>
-      <div class="conn-tile">Extra</div>
-      <div class="conn-tile">Culture</div>
-      <div class="conn-tile">Doh</div>
-      <div class="conn-tile">Rasp</div>
-      <div class="conn-tile">Si</div>
-      <div class="conn-tile">Sickle</div>
-      <div class="conn-tile">Ling</div>
-      <div class="conn-tile">Straw</div>
-      <div class="conn-tile">The Green</div>
-      <div class="conn-tile">Tart</div>
-      <div class="conn-tile">Mo</div>
+    <div id="conn-game" class="conn-game">
+      <div id="conn-solved-rows" class="conn-solved-rows" aria-live="polite"></div>
+      <div id="conn-grid" class="conn-grid" role="grid" aria-label="Connections puzzle tiles"></div>
+
+      <div class="conn-status-bar">
+        <span class="conn-mistakes-label">
+          Mistakes remaining:
+          <span class="conn-hearts" id="conn-hearts" aria-label="Mistakes remaining"></span>
+        </span>
+        <span class="conn-message" id="conn-message" aria-live="polite"></span>
+      </div>
+
+      <div class="conn-controls">
+        <button class="conn-btn" id="conn-shuffle" type="button">Shuffle</button>
+        <button class="conn-btn" id="conn-deselect" type="button" disabled>Deselect all</button>
+        <button class="conn-btn conn-btn-primary" id="conn-submit" type="button" disabled>Submit</button>
+      </div>
     </div>
 
-    <a class="play-btn" href="https://connections.swellgarfo.com/game/-OsPAIgZ75UpV1WTMeAs" target="_blank" rel="noopener noreferrer">Play the puzzle →</a>
-
-    <details class="conn-reveal">
-      <summary>Reveal the solution</summary>
-      <div class="conn-solution-row cat-1">
-        <div class="conn-solution-title">___Berry</div>
-        <div class="conn-solution-words">Blue · Cran · Rasp · Straw</div>
-      </div>
-      <div class="conn-solution-row cat-2">
-        <div class="conn-solution-title">___Mile</div>
-        <div class="conn-solution-words">6 Minute · Extra · Si · The Green</div>
-      </div>
-      <div class="conn-solution-row cat-3">
-        <div class="conn-solution-title">Pop___</div>
-        <div class="conn-solution-words">Corn · Culture · Sickle · Tart</div>
-      </div>
-      <div class="conn-solution-row cat-4">
-        <div class="conn-solution-title">(K)NE(E)</div>
-        <div class="conn-solution-words">Cap · Doh · Ling · Mo</div>
-      </div>
-    </details>
+    <p class="conn-secondary-link"><a href="https://connections.swellgarfo.com/game/-OsPAIgZ75UpV1WTMeAs" target="_blank" rel="noopener noreferrer">Also playable on swellgarfo →</a></p>
   </article>
 </main>
 
 <footer>© 2026 The Woodley Leaves · Maret School Student Publication<br>Online Editor-in-Chief: <a href="mailto:arielp2027@maret.org">arielp2027@maret.org</a> · Online Managing Editor: <a href="mailto:farrynb2027@maret.org">farrynb2027@maret.org</a></footer>
 
+<script src="connections.js"></script>
 </body>
 </html>
