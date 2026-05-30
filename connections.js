@@ -3,7 +3,7 @@
   const GROUPS = [
     { name: '___Berry',  words: ['Blue', 'Cran', 'Rasp', 'Straw'],            level: 1 },
     { name: '___Mile',   words: ['6 Minute', 'Extra', 'Si', 'The Green'],     level: 2 },
-    { name: 'Pop___',    words: ['Corn', 'Culture', 'Sickle', 'Tart'],        level: 3 },
+    { name: 'Pop___',    words: ['Corn', 'Culture', 'Sicle', 'Tart'],        level: 3 },
     { name: '(K)NE(E)',  words: ['Cap', 'Doh', 'Ling', 'Mo'],                 level: 4 },
   ];
 
