@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title> Powderpuff! — The Centerspread</title>
+<meta name="description" content="A photo gallery from the senior–junior Powderpuff game, from the June 2026 June-edition centerspread of The Woodley Leaves.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="centerspread.css" />
+<style>
+  .cs-back { font-family: Georgia, serif; font-size: 14px; color: #555; text-decoration: none; display: inline-block; margin: 8px 0 24px; }
+  .cs-back:hover { color: var(--ink, #111); }
+  .article-body p { font-family: Georgia, serif; font-size: 16px; line-height: 1.7; margin: 0 0 1.1em; color: #1a1a1a; }
+
+  /* ── Carousel ──────────────────────────────────────────────── */
+  .carousel {
+    position: relative;
+    margin: 18px 0 24px;
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .carousel-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .carousel-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 360ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .carousel-slide.is-active { opacity: 1; }
+  .carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Prev / next arrows */
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 160ms ease, transform 160ms ease;
+    font-family: Georgia, serif;
+  }
+  .carousel-btn:hover, .carousel-btn:focus-visible {
+    background: rgba(0,0,0,0.7);
+    outline: none;
+  }
+  .carousel-btn.prev { left: 12px; }
+  .carousel-btn.next { right: 12px; }
+  .carousel-btn:active { transform: translateY(-50%) scale(0.94); }
+
+  /* Dots */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 8px;
+    background: #fff;
+  }
+  .carousel-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1px solid #888;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+  .carousel-dot.is-active {
+    background: var(--ink, #111);
+    border-color: var(--ink, #111);
+  }
+
+  /* Caption */
+  .carousel-caption {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 13px;
+    color: #555;
+    margin: -8px 0 0;
+    line-height: 1.5;
+    text-align: center;
+    padding: 0 8px 4px;
+  }
+
+  /* Counter */
+  .carousel-counter {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-family: Georgia, serif;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: #fff;
+    background: rgba(0,0,0,0.55);
+    padding: 4px 10px;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-ornament left" aria-hidden="true"><svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><path d="M 4 15 Q 16 4 34 10 Q 48 14 52 22 Q 40 26 22 20 Q 10 16 4 15 Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M 6 16 Q 26 19 52 22" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M 16 10 L 20 17" stroke="currentColor" stroke-width="0.8"/><path d="M 24 9 L 28 18" stroke="currentColor" stroke-width="0.8"/><path d="M 34 11 L 36 20" stroke="currentColor" stroke-width="0.8"/></svg></div>
+  <div class="masthead-ornament right" aria-hidden="true"><svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><path d="M 4 15 Q 16 4 34 10 Q 48 14 52 22 Q 40 26 22 20 Q 10 16 4 15 Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M 6 16 Q 26 19 52 22" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M 16 10 L 20 17" stroke="currentColor" stroke-width="0.8"/><path d="M 24 9 L 28 18" stroke="currentColor" stroke-width="0.8"/><path d="M 34 11 L 36 20" stroke="currentColor" stroke-width="0.8"/></svg></div>
+  <h1><a href="index.html">The Woodley Leaves</a></h1>
+  <div class="dateline">WEDNESDAY, JUNE 3, 2026 &nbsp;·&nbsp; MARET SCHOOL · JUNE EDITION</div>
+</div>
+
+<main class="container">
+  <a class="cs-back" href="index.html">← Back to the Centerspread</a>
+
+  <article class="print-piece">
+    <div class="print-piece-head">
+      <div class="kicker">Photo Gallery</div>
+      <h3>Powderpuff!</h3>
+      <div class="byline"></div>
+    </div>
+
+    <div class="carousel" aria-roledescription="carousel" aria-label="Powderpuff game photos">
+      <div class="carousel-viewport" id="carousel-viewport">
+        <div class="carousel-slide is-active" data-caption="Seniors line the sideline as the game gets underway in front of the &ldquo;Last Ride&rdquo; banner.">
+          <img src="media/powderpuff-1.jpeg" alt="Players on the field in front of senior banners reading Last Ride at the Powderpuff game" />
+        </div>
+        <div class="carousel-slide" data-caption="A moment from the senior&ndash;junior matchup mid-game.">
+          <img src="media/powderpuff-2.jpeg" alt="A moment from the senior–junior Powderpuff matchup" />
+        </div>
+        <div class="carousel-slide" data-caption="The Class of 2026 on the court and field for their final Powderpuff game.">
+          <img src="media/powderpuff-3.jpeg" alt="The Class of 2026 on the court and field for their final Powderpuff game" />
+        </div>
+        <span class="carousel-counter" id="carousel-counter">1 / 3</span>
+        <button class="carousel-btn prev" type="button" id="carousel-prev" aria-label="Previous photo">&#x2039;</button>
+        <button class="carousel-btn next" type="button" id="carousel-next" aria-label="Next photo">&#x203A;</button>
+      </div>
+      <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Choose a photo">
+        <button class="carousel-dot is-active" type="button" role="tab" aria-label="Photo 1" aria-selected="true"></button>
+        <button class="carousel-dot" type="button" role="tab" aria-label="Photo 2" aria-selected="false"></button>
+        <button class="carousel-dot" type="button" role="tab" aria-label="Photo 3" aria-selected="false"></button>
+      </div>
+    </div>
+    
+
+    
+  </article>
+</main>
+
+<footer>© 2026 The Woodley Leaves · Maret School Student Publication<br>Online Editor-in-Chief: <a href="mailto:arielp2027@maret.org">arielp2027@maret.org</a> · Online Managing Editor: <a href="mailto:farrynb2027@maret.org">farrynb2027@maret.org</a></footer>
+
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll('.carousel-slide'));
+  const dots = Array.from(document.querySelectorAll('.carousel-dot'));
+  const counter = document.getElementById('carousel-counter');
+  const caption = document.getElementById('carousel-caption');
+  const prevBtn = document.getElementById('carousel-prev');
+  const nextBtn = document.getElementById('carousel-next');
+  const viewport = document.getElementById('carousel-viewport');
+  let index = 0;
+
+  function show(next) {
+    index = (next + slides.length) % slides.length;
+    slides.forEach((s, i) => s.classList.toggle('is-active', i === index));
+    dots.forEach((d, i) => {
+      d.classList.toggle('is-active', i === index);
+      d.setAttribute('aria-selected', i === index ? 'true' : 'false');
+    });
+    if (counter) counter.textContent = `${index + 1} / ${slides.length}`;
+    if (caption) caption.innerHTML = slides[index].dataset.caption || '';
+  }
+
+  prevBtn.addEventListener('click', () => show(index - 1));
+  nextBtn.addEventListener('click', () => show(index + 1));
+  dots.forEach((d, i) => d.addEventListener('click', () => show(i)));
+
+  // Keyboard arrows when the carousel is focused / hovered
+  viewport.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(index - 1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); show(index + 1); }
+  });
+  viewport.tabIndex = 0;
+
+  // Touch swipe
+  let touchX = null;
+  viewport.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].clientX; }, { passive: true });
+  viewport.addEventListener('touchend', (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) show(dx < 0 ? index + 1 : index - 1);
+    touchX = null;
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
