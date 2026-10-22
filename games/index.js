@@ -1,8 +1,11 @@
 import { renderConnections } from "./connections.js";
 import { renderScramble } from "./scramble.js";
 import { renderCode } from "./code.js";
+import { renderBee } from "./bee.js";
+import { renderCrossword } from "./crossword.js";
+import { renderWordsearch } from "./wordsearch.js";
 
-const RENDERERS = { connections: renderConnections, scramble: renderScramble, code: renderCode };
+const RENDERERS = { connections: renderConnections, scramble: renderScramble, bee: renderBee, crossword: renderCrossword, wordsearch: renderWordsearch, code: renderCode };
 
 // Draws a game into `root`. Returns false when the type is unknown.
 export function renderGame(root, game) {

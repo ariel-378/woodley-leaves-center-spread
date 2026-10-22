@@ -237,3 +237,10 @@
 /* ── Custom (pasted-code) games ── */
 .cs-code-frame { display: block; width: 100%; border: 1px solid var(--rule, #ddd); border-radius: 6px; background: #fff; }
 .cs-error { color: #b8002a; font-family: Georgia, serif; }
+
+/* ── Ported puzzle extras (the base .cw-*, .sb-* and .ws-cell styles live in centerspread.css) ── */
+.cw-grid-wrap { position: relative; }
+.cw-input { position: absolute; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; border: 0; padding: 0; pointer-events: none; }
+.sb-layout:focus { outline: none; }
+.sb-layout:focus-visible { outline: 2px solid var(--accent, #2e7d32); outline-offset: 4px; border-radius: 6px; }
+.btn-toggle-solution--ghost { background: #fff; color: var(--accent, #2e7d32); border: 1px solid var(--accent, #2e7d32); }

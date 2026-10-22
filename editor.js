@@ -1,7 +1,7 @@
 // Editor dialogs: add/edit a game, manage editors, confirm a removal, and the
 // demo-mode sign-in. All built on <dialog>, so focus and Escape just work.
 import { CSStore } from "./store.js";
-import { validateGame, isValidEmail, normalizeEmail, GAME_TYPES, TYPE_LABELS, CONNECTIONS_GROUPS } from "./validate.js";
+import { validateGame, isValidEmail, normalizeEmail, GAME_TYPES, TYPE_LABELS, CONNECTIONS_GROUPS, CROSSWORD_SIZE, CROSSWORD_ACROSS, CROSSWORD_DOWN } from "./validate.js";
 import { EXAMPLE_CODE } from "./games/code.js";
 import { renderGame } from "./games/index.js";
 import { escapeHtml } from "./games/dom.js";
@@ -96,6 +96,26 @@ const GAME_FORM = `
       <label>Answers, one per line. The scramble is made for you. To choose it yourself write <code>SCRAMBLED = ANSWER</code>.
         <textarea name="scrambleText" rows="8" placeholder="BARBECUE&#10;CEI AECMR = ICE CREAM"></textarea></label>
     </fieldset>
+    <fieldset data-type-panel="bee"><legend>Spelling Bee</legend>
+      <div class="cs-grid2">
+        <label>Center letter <input name="beeCenter" maxlength="1" autocomplete="off" placeholder="T"></label>
+        <label>Six outer letters <input name="beeOuter" maxlength="6" autocomplete="off" placeholder="AERLIN"></label>
+      </div>
+      <label>Valid words, one per line. Each must have four or more letters, include the center letter, and use only the seven letters.
+        <textarea name="beeWords" rows="10" placeholder="ANTE&#10;LATE&#10;TRAIL"></textarea></label>
+    </fieldset>
+    <fieldset data-type-panel="crossword"><legend>Mini Crossword</legend>
+      <p class="cs-note">Five rows of five letters. The columns form the Down answers, so make sure they spell words too. Numbering: 1 is the top-left square, 2 to 5 run along the top row (Down), 6 to 9 down the first column (Across).</p>
+      <div class="cs-grid-rows">${Array.from({ length: CROSSWORD_SIZE }, (_, i) => `<label>Row ${i + 1} <input name="cwRow${i}" maxlength="5" autocomplete="off" class="cs-letters"></label>`).join("")}</div>
+      <div class="cs-grid2">
+        <div class="cs-clues"><strong>Across</strong>${CROSSWORD_ACROSS.map((n, i) => `<label>${n} Across <input name="cwAcross${i}"></label>`).join("")}</div>
+        <div class="cs-clues"><strong>Down</strong>${CROSSWORD_DOWN.map((n, i) => `<label>${n} Down <input name="cwDown${i}"></label>`).join("")}</div>
+      </div>
+    </fieldset>
+    <fieldset data-type-panel="wordsearch"><legend>Word Search</legend>
+      <label>Words, one per line. Shown exactly as typed; only the letters go in the grid. Keep each to 16 letters or fewer.
+        <textarea name="wsWords" rows="10" placeholder="Cherry Blossoms&#10;April Fools Day&#10;Sunshine"></textarea></label>
+    </fieldset>
     <fieldset data-type-panel="code"><legend>Custom game</legend>
       <p class="cs-note">Paste a self-contained game: its HTML, CSS and JavaScript in one block. It runs in a sandbox and can't touch the rest of the site. The box starts with a working example.</p>
       <label>Height in pixels <input name="height" type="number" min="200" max="2000" value="500"></label>
@@ -131,7 +151,16 @@ function fillGameForm(form, game) {
   set("intro", game?.intro);
   set("publishAt", toLocalInput(game?.publishAt));
   (game?.data?.groups || []).forEach((g, i) => { set(`cn-name-${i}`, g.name); set(`cn-words-${i}`, (g.words || []).join(", ")); });
-  set("scrambleText", (game?.data?.words || []).map((w) => `${w.scrambled} = ${w.answer}`).join("\n"));
+  set("scrambleText", game?.type === "scramble" ? (game.data.words || []).map((w) => `${w.scrambled} = ${w.answer}`).join("\n") : "");
+  set("beeCenter", game?.type === "bee" ? game.data.center : "");
+  set("beeOuter", game?.type === "bee" ? (game.data.outer || []).join("") : "");
+  set("beeWords", game?.type === "bee" ? (game.data.words || []).join("\n") : "");
+  for (let i = 0; i < CROSSWORD_SIZE; i += 1) {
+    set(`cwRow${i}`, game?.type === "crossword" ? game.data.rows?.[i] : "");
+    set(`cwAcross${i}`, game?.type === "crossword" ? game.data.across?.[CROSSWORD_ACROSS[i]] : "");
+    set(`cwDown${i}`, game?.type === "crossword" ? game.data.down?.[CROSSWORD_DOWN[i]] : "");
+  }
+  set("wsWords", game?.type === "wordsearch" ? (game.data.words || []).join("\n") : "");
   set("height", game?.data?.height ?? 500);
   set("code", game?.type === "code" ? game.data.code : EXAMPLE_CODE);
 }
@@ -150,6 +179,13 @@ function readGameForm(form, existingId) {
     publishAt: f("publishAt"),
     groups: Array.from({ length: CONNECTIONS_GROUPS }, (_, i) => ({ name: f(`cn-name-${i}`), words: f(`cn-words-${i}`).split(",") })),
     scrambleText: f("scrambleText"),
+    beeCenter: f("beeCenter"),
+    beeOuter: f("beeOuter"),
+    beeWords: f("beeWords"),
+    cwRows: Array.from({ length: CROSSWORD_SIZE }, (_, i) => f(`cwRow${i}`)),
+    cwAcross: Array.from({ length: CROSSWORD_SIZE }, (_, i) => f(`cwAcross${i}`)),
+    cwDown: Array.from({ length: CROSSWORD_SIZE }, (_, i) => f(`cwDown${i}`)),
+    wsWords: f("wsWords"),
     code: f("code"),
     height: f("height"),
   };

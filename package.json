@@ -5,6 +5,6 @@
   "description": "The Woodley Leaves Center Spread: the print edition's games, playable online.",
   "scripts": {
     "test": "node --test",
-    "serve": "python3 -m http.server 8010"
+    "serve": "python3 serve.py"
   }
 }

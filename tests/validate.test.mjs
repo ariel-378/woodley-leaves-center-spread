@@ -127,3 +127,39 @@ test("validateGame stores the publish time and rejects a bad one", () => {
   assert.equal(validateGame(connectionsInput).game.publishAt, null);
   assert.ok(validateGame({ ...connectionsInput, publishAt: "soon" }).errors.some((e) => e.includes("Publish time")));
 });
+
+const base = { title: "P", editionLabel: "E", editionDate: "2026-01-01" };
+
+test("validateGame builds a spelling bee and rejects words that break the rules", () => {
+  const good = validateGame({ ...base, type: "bee", beeCenter: "t", beeOuter: "aerlin", beeWords: "ante\nlate\nlate\ntrail" });
+  assert.equal(good.ok, true, good.errors.join(" "));
+  assert.deepEqual(good.game.data.center, "T");
+  assert.deepEqual(good.game.data.words, ["ANTE", "LATE", "TRAIL"]);
+  const bad = validateGame({ ...base, type: "bee", beeCenter: "t", beeOuter: "aerlin", beeWords: "rain" });
+  assert.ok(bad.errors.some((e) => e.includes('"RAIN"')));
+  const dup = validateGame({ ...base, type: "bee", beeCenter: "a", beeOuter: "aerlin", beeWords: "lane" });
+  assert.ok(dup.errors.some((e) => e.includes("different")));
+});
+
+test("validateGame builds a crossword and needs five rows and ten clues", () => {
+  const rows = ["BASIC", "ARENA", "SEEDS", "INDIE", "CASES"];
+  const clues = ["a", "b", "c", "d", "e"];
+  const good = validateGame({ ...base, type: "crossword", cwRows: rows.map((r) => r.toLowerCase()), cwAcross: clues, cwDown: clues });
+  assert.equal(good.ok, true, good.errors.join(" "));
+  assert.deepEqual(good.game.data.rows, rows);
+  assert.deepEqual(Object.keys(good.game.data.across), ["1", "6", "7", "8", "9"]);
+  const short = validateGame({ ...base, type: "crossword", cwRows: ["BASI", ...rows.slice(1)], cwAcross: clues, cwDown: clues });
+  assert.ok(short.errors.some((e) => e.includes("5 letters")));
+  const missing = validateGame({ ...base, type: "crossword", cwRows: rows, cwAcross: clues, cwDown: ["a", "b"] });
+  assert.ok(missing.errors.some((e) => e.includes("clues")));
+});
+
+test("validateGame builds a word search and limits word length", () => {
+  const good = validateGame({ ...base, type: "wordsearch", wsWords: "Cherry Blossoms\nBees, Sunshine" });
+  assert.equal(good.ok, true, good.errors.join(" "));
+  assert.deepEqual(good.game.data.words, ["Cherry Blossoms", "Bees", "Sunshine"]);
+  const few = validateGame({ ...base, type: "wordsearch", wsWords: "Bees" });
+  assert.equal(few.ok, false);
+  const long = validateGame({ ...base, type: "wordsearch", wsWords: "a\nb\nsupercalifragilisticexpialidocious" });
+  assert.ok(long.errors.some((e) => e.includes("too long")));
+});

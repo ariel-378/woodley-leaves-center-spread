@@ -1,8 +1,15 @@
 // Pure helpers for the Center Spread: validation, scrambling, edition grouping.
 // No DOM, no storage, so everything here is covered by tests/validate.test.mjs.
 
-export const GAME_TYPES = ["connections", "scramble", "code"];
-export const TYPE_LABELS = { connections: "Connections", scramble: "Word Scramble", code: "Custom game" };
+export const GAME_TYPES = ["connections", "scramble", "bee", "crossword", "wordsearch", "code"];
+export const TYPE_LABELS = { connections: "Connections", scramble: "Word Scramble", bee: "Spelling Bee", crossword: "Mini Crossword", wordsearch: "Word Search", code: "Custom game" };
+export const BEE_OUTER = 6;
+export const BEE_MIN_WORD = 4;
+export const CROSSWORD_SIZE = 5;
+export const CROSSWORD_ACROSS = [1, 6, 7, 8, 9];
+export const CROSSWORD_DOWN = [1, 2, 3, 4, 5];
+export const WORDSEARCH_MIN = 3;
+export const WORDSEARCH_MAX_LETTERS = 16;
 export const CONNECTIONS_GROUPS = 4;
 export const WORDS_PER_GROUP = 4;
 export const MIN_SCRAMBLE_WORDS = 3;
@@ -101,6 +108,44 @@ function validateScramble(scrambleText, rng) {
   return { errors, data: { words } };
 }
 
+const splitLines = (text) => String(text || "").split(/[\r\n,]+/).map((w) => w.trim()).filter(Boolean);
+export const wordsearchForm = (w) => String(w).toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+function validateBee(input) {
+  const errors = [];
+  const center = String(input?.beeCenter || "").trim().toUpperCase();
+  const outer = String(input?.beeOuter || "").toUpperCase().replace(/[^A-Z]/g, "").split("");
+  const words = splitLines(input?.beeWords).map((w) => w.toUpperCase());
+  if (!/^[A-Z]$/.test(center)) errors.push("Center must be a single letter.");
+  if (outer.length !== BEE_OUTER) errors.push(`Outer letters must be exactly ${BEE_OUTER} letters.`);
+  if (new Set([center, ...outer]).size !== BEE_OUTER + 1) errors.push("All seven letters must be different.");
+  if (words.length === 0) errors.push("Add at least one valid word, one per line.");
+  const allowed = new Set([center, ...outer]);
+  const bad = words.find((w) => w.length < BEE_MIN_WORD || !w.includes(center) || [...w].some((ch) => !allowed.has(ch)));
+  if (bad) errors.push(`"${bad}" isn't valid: words need ${BEE_MIN_WORD}+ letters, the center letter, and only the seven letters.`);
+  return { errors, data: { center, outer, words: [...new Set(words)] } };
+}
+
+function validateCrossword(input) {
+  const errors = [];
+  const rows = Array.from({ length: CROSSWORD_SIZE }, (_, i) => String(input?.cwRows?.[i] || "").trim().toUpperCase());
+  if (!rows.every((r) => new RegExp(`^[A-Z]{${CROSSWORD_SIZE}}$`).test(r))) errors.push(`Each row must be exactly ${CROSSWORD_SIZE} letters.`);
+  const clueMap = (numbers, list) => Object.fromEntries(numbers.map((n, i) => [n, String(list?.[i] || "").trim()]).filter(([, v]) => v));
+  const across = clueMap(CROSSWORD_ACROSS, input?.cwAcross);
+  const down = clueMap(CROSSWORD_DOWN, input?.cwDown);
+  if (Object.keys(across).length !== CROSSWORD_SIZE || Object.keys(down).length !== CROSSWORD_SIZE) errors.push("Fill in all five Across and all five Down clues.");
+  return { errors, data: { rows, across, down } };
+}
+
+function validateWordsearch(input) {
+  const errors = [];
+  const words = splitLines(input?.wsWords).filter((w) => wordsearchForm(w).length >= 2);
+  if (words.length < WORDSEARCH_MIN) errors.push(`Enter at least ${WORDSEARCH_MIN} words, one per line.`);
+  const tooLong = words.find((w) => wordsearchForm(w).length > WORDSEARCH_MAX_LETTERS);
+  if (tooLong) errors.push(`"${tooLong}" is too long. Keep words to ${WORDSEARCH_MAX_LETTERS} letters or fewer.`);
+  return { errors, data: { words } };
+}
+
 function validateCode(code, height) {
   const errors = [];
   const text = String(code || "").trim();
@@ -150,6 +195,9 @@ export function validateGame(input, rng = Math.random) {
 
   const typed = type === "connections" ? validateConnections(input.groups)
     : type === "scramble" ? validateScramble(input.scrambleText, rng)
+    : type === "bee" ? validateBee(input)
+    : type === "crossword" ? validateCrossword(input)
+    : type === "wordsearch" ? validateWordsearch(input)
     : type === "code" ? validateCode(input.code, input.height)
     : { errors: [], data: {} };
   const allErrors = [...errors, ...typed.errors];
