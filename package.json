@@ -1,0 +1,10 @@
+{
+  "name": "woodley-leaves-center-spread",
+  "private": true,
+  "type": "module",
+  "description": "The Woodley Leaves Center Spread: the print edition's games, playable online.",
+  "scripts": {
+    "test": "node --test",
+    "serve": "python3 -m http.server 8010"
+  }
+}

@@ -1,0 +1,47 @@
+// Firestore security rules for the Center Spread. These, not the JavaScript,
+// decide who can change games and who counts as an editor. Deploy with
+// `firebase deploy --only firestore:rules` or paste into the console (see SETUP.md).
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Keep this list identical to CS_CONFIG.bootstrapEditors in config.js.
+    function bootstrapEditors() {
+      return ['arielp2027@maret.org'];
+    }
+    function signedIn() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true;
+    }
+    function email() {
+      return request.auth.token.email.lower();
+    }
+    function isEditor() {
+      return signedIn()
+        && (email() in bootstrapEditors()
+            || exists(/databases/$(database)/documents/editors/$(email())));
+    }
+
+    // Games: everyone can read, editors can write. A document's id field must
+    // match its path so a game can't be saved under someone else's id.
+    match /games/{gameId} {
+      allow read: if true;
+      allow create, update: if isEditor() && request.resource.data.id == gameId;
+      allow delete: if isEditor();
+    }
+
+    // Editors: the allowlist. Anyone signed in may look up their own entry
+    // (that is how the site learns whether to show editor tools); only editors
+    // may list, add, or remove entries, and nobody can remove themselves.
+    match /editors/{editorEmail} {
+      allow get: if signedIn() && editorEmail == email();
+      allow list: if isEditor();
+      allow create: if isEditor()
+        && editorEmail == editorEmail.lower()
+        && request.resource.data.email == editorEmail;
+      allow update: if false;
+      allow delete: if isEditor() && editorEmail != email();
+    }
+  }
+}

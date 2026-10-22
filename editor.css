@@ -1,0 +1,72 @@
+/* Center Spread chrome: the front-page cards and editions, the editor-access
+   button, and the editor dialogs. Reader-facing game styles live in games.css. */
+
+/* ── Front page ── */
+.cs-back { font-family: Georgia, serif; font-size: 14px; color: #555; text-decoration: none; display: inline-block; margin: 8px 0 24px; }
+.cs-back:hover { color: var(--ink, #111); }
+.cs-controls { display: flex; flex-wrap: wrap; gap: 14px 22px; justify-content: center; align-items: center; margin: -14px 0 30px; font-family: Georgia, serif; font-size: 14px; color: #555; }
+.cs-controls label { display: inline-flex; align-items: center; gap: 8px; }
+.cs-controls select { font: inherit; padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; background: #fff; color: var(--ink, #111); }
+.cs-edition { margin-bottom: 44px; }
+.cs-edition-title { font-family: "Old Standard TT", Georgia, serif; font-size: 26px; letter-spacing: -0.5px; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--ink, #111); display: flex; align-items: baseline; gap: 12px; }
+.cs-edition-title small { font-family: Georgia, serif; font-style: italic; font-weight: normal; font-size: 13px; color: #555; }
+.cs-empty { text-align: center; font-family: Georgia, serif; font-style: italic; color: #555; }
+.cs-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 8px; }
+.cs-card-wrap { position: relative; }
+.cs-card { display: block; height: 100%; box-sizing: border-box; text-decoration: none; color: inherit; border: 1px solid var(--rule, #ddd); border-radius: 6px; padding: 20px 22px 22px; background: #fff; transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+.cs-card:hover, .cs-card:focus-visible { border-color: var(--ink, #111); box-shadow: 0 6px 18px rgba(0,0,0,0.05); transform: translateY(-1px); text-decoration: none; }
+.cs-card .kicker { font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--accent, #2e7d32); margin-bottom: 6px; }
+.cs-card h3 { font-family: "Old Standard TT", Georgia, serif; font-size: 24px; line-height: 1.15; letter-spacing: -0.5px; margin: 0 0 6px; }
+.cs-card-excerpt { font-family: Georgia, serif; font-size: 14.5px; color: #333; line-height: 1.55; margin: 0 0 14px; }
+.cs-card-action { font-family: Georgia, serif; font-size: 13px; font-weight: bold; color: var(--accent, #2e7d32); letter-spacing: 0.5px; }
+.cs-card-tools { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; }
+.cs-piece-tools { display: flex; gap: 6px; justify-content: flex-end; margin-bottom: 8px; }
+
+/* ── Buttons ── */
+.cs-btn { font-family: Georgia, serif; font-size: 13px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--ink, #111); background: #fff; color: var(--ink, #111); cursor: pointer; line-height: 1.2; }
+.cs-btn:hover { background: var(--ink, #111); color: #fff; }
+.cs-btn-primary { background: var(--accent, #2e7d32); border-color: var(--accent, #2e7d32); color: #fff; }
+.cs-btn-primary:hover { background: #246628; border-color: #246628; }
+.cs-btn-quiet { border-color: #ccc; color: #555; font-size: 12px; padding: 5px 10px; }
+.cs-btn-quiet:hover { background: #f2f2f2; color: var(--ink, #111); }
+.cs-btn-danger { background: #b8002a; border-color: #b8002a; color: #fff; }
+.cs-btn-danger:hover { background: #8f0020; border-color: #8f0020; }
+
+/* ── Editor access bar, top-right of the masthead ── */
+.masthead { position: relative; }
+.cs-editor-bar { position: absolute; top: 12px; right: 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 60vw; z-index: 2; }
+.cs-editor-user { font-family: Georgia, serif; font-size: 13px; color: #555; }
+.cs-editor-denied { font-family: Georgia, serif; font-size: 12px; color: #b8002a; max-width: 260px; text-align: right; }
+@media (max-width: 640px) {
+  .cs-editor-bar { position: static; justify-content: center; max-width: none; margin-top: 8px; }
+}
+
+/* ── Dialogs ── */
+.cs-dialog { border: 1px solid var(--ink, #111); border-radius: 8px; padding: 0; width: min(680px, calc(100vw - 32px)); max-height: calc(100vh - 48px); color: var(--ink, #111); }
+.cs-dialog::backdrop { background: rgba(0,0,0,0.45); }
+.cs-form { padding: 22px 24px 20px; display: grid; gap: 14px; font-family: Georgia, serif; font-size: 14px; }
+.cs-form-narrow { width: min(440px, 100%); }
+.cs-form h2 { font-family: "Old Standard TT", Georgia, serif; font-size: 26px; margin: 0; letter-spacing: -0.5px; }
+.cs-form label { display: grid; gap: 5px; font-size: 13px; color: #333; }
+.cs-form input, .cs-form select, .cs-form textarea { font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; background: #fff; color: var(--ink, #111); width: 100%; box-sizing: border-box; }
+.cs-form textarea[name="code"] { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
+.cs-form input:focus, .cs-form select:focus, .cs-form textarea:focus { outline: none; border-color: var(--accent, #2e7d32); box-shadow: 0 0 0 2px rgba(46,125,50,0.15); }
+.cs-form fieldset { border: 1px solid var(--rule, #ddd); border-radius: 6px; padding: 12px 14px 14px; margin: 0; display: grid; gap: 10px; }
+.cs-form fieldset[hidden] { display: none; }
+.cs-form legend { font-family: "Old Standard TT", Georgia, serif; font-size: 15px; padding: 0 6px; }
+.cs-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .cs-grid2 { grid-template-columns: 1fr; } }
+.cs-group { display: grid; gap: 8px; padding: 10px 12px; border-radius: 6px; border-left: 6px solid #ccc; background: #fafafa; }
+.cs-group-yellow { border-left-color: #f5d76e; }
+.cs-group-green { border-left-color: #a3d58b; }
+.cs-group-blue { border-left-color: #9fc3ec; }
+.cs-group-purple { border-left-color: #c9a7e6; }
+.cs-note { font-size: 12.5px; color: #555; margin: 0; line-height: 1.5; }
+.cs-form-error { color: #b8002a; font-size: 13px; margin: 0; min-height: 1em; line-height: 1.5; }
+.cs-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.cs-editor-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--rule, #ddd); border-radius: 6px; max-height: 240px; overflow: auto; }
+.cs-editor-list li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--rule, #ddd); }
+.cs-editor-list li:last-child { border-bottom: none; }
+
+/* ── Toast ── */
+.cs-toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink, #111); color: #fff; font-family: Georgia, serif; font-size: 14px; padding: 10px 18px; border-radius: 999px; box-shadow: 0 6px 18px rgba(0,0,0,0.2); z-index: 50; max-width: calc(100vw - 32px); }
