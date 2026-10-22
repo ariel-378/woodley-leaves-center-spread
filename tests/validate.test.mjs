@@ -104,3 +104,26 @@ test("groupByEdition sorts editions newest first and games by title", () => {
   assert.deepEqual(newest[0].games.map((g) => g.title), ["Alpha", "Zed"]);
   assert.deepEqual(groupByEdition(games, "oldest").map((e) => e.label), ["March 2026", "June 2026"]);
 });
+
+test("parsePublishAt: blank means now, junk is an error, a time becomes ISO", async () => {
+  const { parsePublishAt } = await import("../validate.js");
+  assert.deepEqual(parsePublishAt(""), { iso: null });
+  assert.ok(parsePublishAt("next tuesday").error);
+  assert.equal(parsePublishAt("2026-11-03T07:00").iso, new Date("2026-11-03T07:00").toISOString());
+});
+
+test("isLive hides a game until its publish time", async () => {
+  const { isLive } = await import("../validate.js");
+  const now = Date.parse("2026-10-22T12:00:00Z");
+  assert.equal(isLive({ publishAt: null }, now), true);
+  assert.equal(isLive({ publishAt: "2026-10-22T11:59:00Z" }, now), true);
+  assert.equal(isLive({ publishAt: "2026-10-22T12:01:00Z" }, now), false);
+});
+
+test("validateGame stores the publish time and rejects a bad one", () => {
+  const scheduled = validateGame({ ...connectionsInput, publishAt: "2030-01-01T09:00" });
+  assert.equal(scheduled.ok, true);
+  assert.equal(scheduled.game.publishAt, new Date("2030-01-01T09:00").toISOString());
+  assert.equal(validateGame(connectionsInput).game.publishAt, null);
+  assert.ok(validateGame({ ...connectionsInput, publishAt: "soon" }).errors.some((e) => e.includes("Publish time")));
+});

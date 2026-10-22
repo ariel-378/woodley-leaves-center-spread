@@ -20,6 +20,12 @@ account. If your account is on the editor list you get three buttons:
   Every game belongs to an **edition** (a name like "June 2026" and a date).
   The front page groups games by edition and can sort newest or oldest first,
   or show a single edition.
+  - **Preview**, next to Save, draws the game exactly as readers will see it
+    before anything is saved. Works for every type.
+  - **Publish** schedules a game. Leave it blank to publish on save, or set a
+    date and time to hold it: editors see it marked Scheduled, readers don't
+    see it until the time arrives. (The hold is applied in the browser; the
+    data is in Firestore from the moment it is saved.)
 - **Edit** and **Remove** appear on each card and on each game's page.
 - **Editors** lists who can sign in and lets you add another Google account by
   email, or remove one.

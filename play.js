@@ -1,14 +1,14 @@
 // One game, chosen by ?id=, rendered from the store.
 import { CSStore } from "./store.js";
 import { renderGame } from "./games/index.js";
-import { TYPE_LABELS } from "./validate.js";
+import { TYPE_LABELS, isLive, formatPublishAt } from "./validate.js";
 import { escapeHtml } from "./games/dom.js";
 import { CSEditor } from "./editor.js";
 import "./editor-bar.js";
 
 const id = new URLSearchParams(location.search).get("id");
 const el = { piece: document.getElementById("cs-play"), dateline: document.querySelector(".dateline") };
-let current = { game: null, signature: "", isEditor: false };
+let current = { game: null, signature: "", isEditor: false, games: [] };
 
 function renderMissing() {
   document.title = "Game not found — The Centerspread";
@@ -23,7 +23,9 @@ function renderTools() {
   if (!current.isEditor || !current.game) return;
   const tools = document.createElement("div");
   tools.className = "cs-piece-tools";
+  const scheduled = !isLive(current.game);
   tools.innerHTML = `
+    ${scheduled ? `<span class="cs-badge">Scheduled · ${escapeHtml(formatPublishAt(current.game.publishAt))} · readers can't see this yet</span>` : ""}
     <button type="button" class="cs-btn cs-btn-quiet" data-edit>Edit game</button>
     <button type="button" class="cs-btn cs-btn-quiet" data-remove>Remove game</button>`;
   tools.querySelector("[data-edit]").addEventListener("click", () => CSEditor.openGameForm(current.game));
@@ -45,17 +47,16 @@ function renderPiece(game) {
   renderTools();
 }
 
-CSStore.games.subscribe((games) => {
-  const game = games.find((g) => g.id === id) || null;
+function show() {
+  const found = current.games.find((g) => g.id === id) || null;
+  const game = found && (current.isEditor || isLive(found)) ? found : null;
   if (!game) { current = { ...current, game: null, signature: "" }; renderMissing(); return; }
   // Only redraw when the game itself changed, so a store refresh doesn't reset play.
   const signature = JSON.stringify({ t: game.title, k: game.kicker, i: game.intro, e: game.edition, d: game.data, y: game.type });
   if (signature === current.signature) return;
   current = { ...current, game, signature };
   renderPiece(game);
-});
+}
 
-CSStore.onSession((session) => {
-  current = { ...current, isEditor: session.isEditor };
-  renderTools();
-});
+CSStore.games.subscribe((games) => { current = { ...current, games }; show(); });
+CSStore.onSession((session) => { current = { ...current, isEditor: session.isEditor }; show(); renderTools(); });

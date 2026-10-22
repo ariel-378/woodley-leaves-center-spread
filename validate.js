@@ -10,6 +10,7 @@ export const CODE_HEIGHT = { min: 200, max: 2000, fallback: 500 };
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SCRAMBLE_ATTEMPTS = 12;
+const DATE_FORMAT = { dateStyle: "medium", timeStyle: "short" };
 
 export function slugify(text) {
   return String(text || "")
@@ -109,9 +110,31 @@ function validateCode(code, height) {
   return { errors, data: { code: text, height: safeHeight } };
 }
 
+// A publish time from the form (datetime-local, read as local time) or from
+// storage (ISO). Blank means "publish now". Returns { iso } or { error }.
+export function parsePublishAt(value) {
+  const text = String(value || "").trim();
+  if (!text) return { iso: null };
+  const ms = Date.parse(text);
+  if (Number.isNaN(ms)) return { error: "Publish time isn't a valid date and time." };
+  return { iso: new Date(ms).toISOString() };
+}
+
+// Readers see a game once its publish time has passed; no time means now.
+export function isLive(game, now = Date.now()) {
+  if (!game?.publishAt) return true;
+  const at = Date.parse(game.publishAt);
+  return Number.isNaN(at) || at <= now;
+}
+
+export function formatPublishAt(iso) {
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? "" : new Intl.DateTimeFormat(undefined, DATE_FORMAT).format(ms);
+}
+
 // Turns raw form input into a stored game, or a list of errors. `input` is:
 // { id?, type, title, kicker, blurb, intro, editionLabel, editionDate,
-//   groups?, scrambleText?, code?, height? }
+//   publishAt?, groups?, scrambleText?, code?, height? }
 export function validateGame(input, rng = Math.random) {
   const errors = [];
   const type = GAME_TYPES.includes(input?.type) ? input.type : null;
@@ -122,6 +145,8 @@ export function validateGame(input, rng = Math.random) {
   const editionDate = String(input?.editionDate || "").trim();
   if (!editionLabel) errors.push("Name the edition, for example June 2026.");
   if (!isRealDate(editionDate)) errors.push("Edition date must be a real date (YYYY-MM-DD).");
+  const publish = parsePublishAt(input?.publishAt);
+  if (publish.error) errors.push(publish.error);
 
   const typed = type === "connections" ? validateConnections(input.groups)
     : type === "scramble" ? validateScramble(input.scrambleText, rng)
@@ -142,6 +167,7 @@ export function validateGame(input, rng = Math.random) {
       blurb: String(input.blurb || "").trim(),
       intro: String(input.intro || "").trim(),
       edition: { label: editionLabel, date: editionDate },
+      publishAt: publish.iso,
       data: typed.data,
     },
   };

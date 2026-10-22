@@ -2,7 +2,8 @@
 // demo-mode sign-in. All built on <dialog>, so focus and Escape just work.
 import { CSStore } from "./store.js";
 import { validateGame, isValidEmail, normalizeEmail, GAME_TYPES, TYPE_LABELS, CONNECTIONS_GROUPS } from "./validate.js";
-import { EXAMPLE_CODE, renderCode } from "./games/code.js";
+import { EXAMPLE_CODE } from "./games/code.js";
+import { renderGame } from "./games/index.js";
 import { escapeHtml } from "./games/dom.js";
 
 const TOAST_MS = 4500;
@@ -86,6 +87,9 @@ const GAME_FORM = `
       <label>Card blurb <input name="blurb" placeholder="One line shown on the card"></label>
     </div>
     <label>Intro, shown above the game <textarea name="intro" rows="2"></textarea></label>
+    <label>Publish <input name="publishAt" type="datetime-local">
+      <span class="cs-note">Leave blank to publish as soon as it's saved. Set a date and time to hold it until then: editors see it marked Scheduled, readers don't see it at all.</span>
+    </label>
 
     <fieldset data-type-panel="connections"><legend>Connections</legend>${groupFields()}</fieldset>
     <fieldset data-type-panel="scramble"><legend>Word Scramble</legend>
@@ -96,17 +100,21 @@ const GAME_FORM = `
       <p class="cs-note">Paste a self-contained game: its HTML, CSS and JavaScript in one block. It runs in a sandbox and can't touch the rest of the site. The box starts with a working example.</p>
       <label>Height in pixels <input name="height" type="number" min="200" max="2000" value="500"></label>
       <label>Game code <textarea name="code" rows="14" spellcheck="false"></textarea></label>
-      <div class="cs-form-actions cs-form-actions-start">
-        <button type="button" class="cs-btn" data-preview>Preview</button>
-      </div>
-      <div class="cs-code-preview" hidden>
-        <p class="cs-note">This is how readers will see it. Change the code and press Refresh preview to see the result.</p>
-        <div class="cs-code-preview-frame"></div>
-      </div>
     </fieldset>
+
+    <section class="cs-preview" hidden aria-live="polite">
+      <h3 class="cs-preview-title">Preview <small class="cs-note">how readers will see it. Change anything and press Refresh preview.</small></h3>
+      <div class="cs-preview-piece">
+        <div class="print-piece-head"><div class="kicker" data-preview-kicker></div><h3 data-preview-heading></h3></div>
+        <p class="print-piece-intro" data-preview-intro></p>
+        <div class="cs-preview-root"></div>
+      </div>
+    </section>
 
     <p class="cs-form-error" role="alert"></p>
     <div class="cs-form-actions">
+      <button type="button" class="cs-btn" data-preview>Preview</button>
+      <span class="cs-form-actions-gap"></span>
       <button type="button" class="cs-btn" data-cancel>Cancel</button>
       <button type="submit" class="cs-btn cs-btn-primary">Save game</button>
     </div>
@@ -121,6 +129,7 @@ function fillGameForm(form, game) {
   set("kicker", game?.kicker);
   set("blurb", game?.blurb);
   set("intro", game?.intro);
+  set("publishAt", toLocalInput(game?.publishAt));
   (game?.data?.groups || []).forEach((g, i) => { set(`cn-name-${i}`, g.name); set(`cn-words-${i}`, (g.words || []).join(", ")); });
   set("scrambleText", (game?.data?.words || []).map((w) => `${w.scrambled} = ${w.answer}`).join("\n"));
   set("height", game?.data?.height ?? 500);
@@ -138,6 +147,7 @@ function readGameForm(form, existingId) {
     kicker: f("kicker"),
     blurb: f("blurb"),
     intro: f("intro"),
+    publishAt: f("publishAt"),
     groups: Array.from({ length: CONNECTIONS_GROUPS }, (_, i) => ({ name: f(`cn-name-${i}`), words: f(`cn-words-${i}`).split(",") })),
     scrambleText: f("scrambleText"),
     code: f("code"),
@@ -145,18 +155,38 @@ function readGameForm(form, existingId) {
   };
 }
 
-// Runs the pasted code in the reader's sandbox, inside the form, so an editor
-// can see the game before it is saved.
-function previewCode(form) {
-  const preview = form.querySelector(".cs-code-preview");
+// An ISO time becomes the local "YYYY-MM-DDTHH:MM" a datetime-local input wants.
+function toLocalInput(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// Draws the game exactly as a reader would get it, inside the form, before it
+// is saved. Title and edition may still be blank at this point, so the preview
+// fills them in; the game data itself must validate.
+function previewGame(form) {
+  const preview = form.querySelector(".cs-preview");
   const error = form.querySelector(".cs-form-error");
-  const result = validateGame({ ...readGameForm(form, "preview"), type: "code", title: "preview", editionLabel: "preview", editionDate: "2000-01-01" });
+  const raw = readGameForm(form, "preview");
+  const result = validateGame({
+    ...raw,
+    title: raw.title || "Untitled game",
+    editionLabel: raw.editionLabel || "Edition",
+    editionDate: raw.editionDate || "2000-01-01",
+  });
   if (!result.ok) { error.innerHTML = result.errors.map(escapeHtml).join("<br>"); return; }
   error.textContent = "";
-  renderCode(preview.querySelector(".cs-code-preview-frame"), result.game.data);
+  const { game } = result;
+  preview.querySelector("[data-preview-kicker]").textContent = `${game.kicker} · ${game.edition.label}`;
+  preview.querySelector("[data-preview-heading]").textContent = game.title;
+  preview.querySelector("[data-preview-intro]").textContent = game.intro;
+  renderGame(preview.querySelector(".cs-preview-root"), game);
   preview.hidden = false;
   form.querySelector("[data-preview]").textContent = "Refresh preview";
-  preview.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  preview.scrollIntoView({ block: "start", behavior: "smooth" });
 }
 
 function showPanel(form) {
@@ -172,7 +202,7 @@ function openGameForm(game) {
   fillGameForm(form, game);
   showPanel(form);
   form.elements.type.addEventListener("change", () => showPanel(form));
-  form.querySelector("[data-preview]").addEventListener("click", () => previewCode(form));
+  form.querySelector("[data-preview]").addEventListener("click", () => previewGame(form));
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const result = validateGame(readGameForm(form, game?.id));

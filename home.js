@@ -1,11 +1,12 @@
 // The Center Spread front page: every game, grouped by edition.
 import { CSStore } from "./store.js";
-import { groupByEdition, TYPE_LABELS } from "./validate.js";
+import { groupByEdition, isLive, formatPublishAt, TYPE_LABELS } from "./validate.js";
 import { escapeHtml } from "./games/dom.js";
 import { CSEditor } from "./editor.js";
 import "./editor-bar.js";
 
 const PREF_KEY = "cs_home_prefs";
+const LIVE_CHECK_MS = 60000; // a scheduled game appears on time without a reload
 const el = {
   editions: document.getElementById("cs-editions"),
   sort: document.getElementById("cs-sort"),
@@ -26,9 +27,11 @@ function card(game) {
       <button type="button" class="cs-btn cs-btn-quiet" data-edit="${escapeHtml(game.id)}">Edit</button>
       <button type="button" class="cs-btn cs-btn-quiet" data-remove="${escapeHtml(game.id)}">Remove</button>
     </div>` : "";
+  const scheduled = !isLive(game);
   return `
     <div class="cs-card-wrap">
-      <a class="cs-card" href="${href}">
+      <a class="cs-card${scheduled ? " cs-card--scheduled" : ""}" href="${href}">
+        ${scheduled ? `<span class="cs-badge">Scheduled · ${escapeHtml(formatPublishAt(game.publishAt))}</span>` : ""}
         <div class="kicker">${escapeHtml(game.kicker || TYPE_LABELS[game.type] || "Game")}</div>
         <h3>${escapeHtml(game.title)}</h3>
         ${game.blurb ? `<p class="cs-card-excerpt">${escapeHtml(game.blurb)}</p>` : ""}
@@ -38,14 +41,15 @@ function card(game) {
 }
 
 function render() {
-  const editions = groupByEdition(state.games, state.order);
+  const visible = state.isEditor ? state.games : state.games.filter((g) => isLive(g));
+  const editions = groupByEdition(visible, state.order);
   const shown = state.edition ? editions.filter((e) => e.label === state.edition) : editions;
 
   el.filter.innerHTML = `<option value="">All editions</option>${editions.map((e) =>
     `<option value="${escapeHtml(e.label)}"${e.label === state.edition ? " selected" : ""}>${escapeHtml(e.label)}</option>`).join("")}`;
   el.sort.value = state.order;
 
-  const total = state.games.length;
+  const total = visible.length;
   el.kicker.textContent = state.edition ? `${state.edition} edition` : "Every edition";
   el.deck.textContent = total === 0 ? "No games yet."
     : `${total} game${total === 1 ? "" : "s"} from ${editions.length} edition${editions.length === 1 ? "" : "s"} of the print centerspread, playable on any device.`;
@@ -69,3 +73,4 @@ el.editions.addEventListener("click", (e) => {
 
 CSStore.games.subscribe((games) => { state = { ...state, games }; render(); });
 CSStore.onSession((session) => { state = { ...state, isEditor: session.isEditor }; render(); });
+setInterval(render, LIVE_CHECK_MS);
