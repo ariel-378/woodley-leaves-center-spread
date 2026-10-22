@@ -11,7 +11,6 @@ const el = {
   editions: document.getElementById("cs-editions"),
   sort: document.getElementById("cs-sort"),
   filter: document.getElementById("cs-edition"),
-  deck: document.getElementById("cs-deck"),
   kicker: document.getElementById("cs-kicker"),
 };
 
@@ -49,10 +48,7 @@ function render() {
     `<option value="${escapeHtml(e.label)}"${e.label === state.edition ? " selected" : ""}>${escapeHtml(e.label)}</option>`).join("")}`;
   el.sort.value = state.order;
 
-  const total = visible.length;
   el.kicker.textContent = state.edition ? `${state.edition} edition` : "Every edition";
-  el.deck.textContent = total === 0 ? "No games yet."
-    : `${total} game${total === 1 ? "" : "s"} from ${editions.length} edition${editions.length === 1 ? "" : "s"} of the print centerspread, playable on any device.`;
 
   el.editions.innerHTML = shown.length === 0 ? '<p class="cs-empty">Nothing here yet.</p>' : shown.map((e) => `
     <section class="cs-edition" aria-labelledby="ed-${escapeHtml(e.date)}">

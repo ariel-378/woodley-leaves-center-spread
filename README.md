@@ -1,6 +1,6 @@
 # The Woodley Leaves Center Spread
 
-The games from the print centerspread of *The Woodley Leaves*, Maret School's
+The games from the print center spread of *The Woodley Leaves*, Maret School's
 student newspaper, playable on any device. Live at
 <https://woodleyleavescenterspread.com>. Plain HTML, CSS and JavaScript
 modules, no build step.
@@ -41,8 +41,7 @@ browser only.
 
 ```
 config.js         public settings: bootstrap editors, Firebase config
-games-seed.js     the games that ship with the site: the newspaper's four
-                  built-in puzzles plus the June 2026 centerspread pair
+games-seed.js     the games that ship with the site
 serve.py          local server with caching off (npm run serve)
 store.js          shared store: sign-in, editor check, games (Firebase or demo)
 validate.js       pure helpers: validation, scrambling, edition grouping (tested)

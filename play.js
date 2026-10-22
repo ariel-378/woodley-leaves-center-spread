@@ -11,9 +11,9 @@ const el = { piece: document.getElementById("cs-play"), dateline: document.query
 let current = { game: null, signature: "", isEditor: false, games: [] };
 
 function renderMissing() {
-  document.title = "Game not found — The Centerspread";
+  document.title = "Game not found — The Center Spread";
   el.piece.innerHTML = `
-    <div class="print-piece-head"><div class="kicker">Centerspread</div><h3>Game not found</h3></div>
+    <div class="print-piece-head"><div class="kicker">Center Spread</div><h3>Game not found</h3></div>
     <p class="print-piece-intro">That game isn't on the Center Spread any more. <a href="index.html">See every game →</a></p>`;
 }
 
@@ -34,7 +34,7 @@ function renderTools() {
 }
 
 function renderPiece(game) {
-  document.title = `${game.title} — The Centerspread`;
+  document.title = `${game.title} — The Center Spread`;
   if (el.dateline) el.dateline.textContent = `MARET SCHOOL · ${game.edition.label.toUpperCase()} EDITION`;
   el.piece.innerHTML = `
     <div class="print-piece-head">
