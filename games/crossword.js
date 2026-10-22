@@ -2,11 +2,10 @@
 // keyboard or, on a phone, through an invisible input that a tap focuses.
 import { escapeHtml } from "./dom.js";
 
-const SIZE = 5;
+import { crosswordNumbers } from "../validate.js";
+
 const SENTINEL = " ";
 const CONFIRM_MS = 3000;
-const ACROSS_NUMBERS = [1, 6, 7, 8, 9];
-const DOWN_NUMBERS = [1, 2, 3, 4, 5];
 
 const TEMPLATE = `
   <div class="cw-layout">
@@ -14,7 +13,7 @@ const TEMPLATE = `
       <div class="cw-meta"><div><div>Mini Crossword</div></div><div class="cw-timer" data-timer>0:00</div></div>
       <div class="cw-grid-wrap">
         <input class="cw-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" tabindex="-1" aria-label="Type a letter for the selected square">
-        <div class="cw-grid" data-grid tabindex="0" role="grid" aria-label="Mini crossword, 5 by 5 grid. Use arrow keys to move and type letters to fill in."></div>
+        <div class="cw-grid" data-grid tabindex="0" role="grid" aria-label="Mini crossword. Use arrow keys to move and type letters to fill in."></div>
       </div>
       <div class="cw-current" aria-live="polite" aria-atomic="true"><span class="label">Clue</span><span data-current>Tap a square to begin.</span></div>
       <div class="cw-controls">
@@ -31,15 +30,15 @@ const TEMPLATE = `
     </div>
   </div>`;
 
-const emptyGrid = () => Array.from({ length: SIZE }, () => Array(SIZE).fill(""));
-// Every row starts an Across word and every column a Down word, numbered 1..9
-// in reading order: 1 is shared by row 1 and column 1, 2-5 are the rest of the
-// top row (Down), 6-9 the rest of the first column (Across).
-const numberAt = (r, c) => (r === 0 ? c + 1 : c === 0 ? SIZE + r : null);
-
 export function renderCrossword(root, data) {
   const solution = (data?.rows || []).map((row) => String(row).toUpperCase().split(""));
+  const ROWS = solution.length;
+  const COLS = solution[0]?.length || 0;
   const clues = { across: data?.across || {}, down: data?.down || {} };
+  const numbers = crosswordNumbers(ROWS, COLS);
+  // Every row starts an Across word and every column a Down word.
+  const numberAt = (r, c) => (r === 0 ? numbers.down[c] : c === 0 ? numbers.across[r] : null);
+  const emptyGrid = () => Array.from({ length: ROWS }, () => Array(COLS).fill(""));
   root.innerHTML = TEMPLATE;
   const el = {
     grid: root.querySelector("[data-grid]"), input: root.querySelector(".cw-input"), timer: root.querySelector("[data-timer]"),
@@ -49,6 +48,9 @@ export function renderCrossword(root, data) {
 
   let state = { grid: emptyGrid(), sel: { row: 0, col: 0 }, dir: "across", placed: false, solved: false, revealed: false, startedAt: null };
   let timer = null;
+  el.grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+  el.grid.style.aspectRatio = `${COLS} / ${ROWS}`;
+  el.grid.setAttribute("aria-label", `Mini crossword, ${ROWS} by ${COLS} grid. Use arrow keys to move and type letters to fill in.`);
 
   const clueNumber = () => (state.dir === "across" ? numberAt(state.sel.row, 0) : numberAt(0, state.sel.col));
   const setGrid = (r, c, value) => state.grid.map((row, ri) => (ri === r ? row.map((ch, ci) => (ci === c ? value : ch)) : row));
@@ -62,8 +64,8 @@ export function renderCrossword(root, data) {
   function renderClues() {
     const items = (dir, numbers) => numbers.filter((n) => clues[dir][n]).map((n) =>
       `<li data-num="${n}" data-dir="${dir}"><span class="num">${n}</span><span>${escapeHtml(clues[dir][n])}</span></li>`).join("");
-    el.across.innerHTML = items("across", ACROSS_NUMBERS);
-    el.down.innerHTML = items("down", DOWN_NUMBERS);
+    el.across.innerHTML = items("across", numbers.across);
+    el.down.innerHTML = items("down", numbers.down);
   }
   function update() {
     const inWord = (r, c) => (state.dir === "across" ? r === state.sel.row : c === state.sel.col);
@@ -100,15 +102,15 @@ export function renderCrossword(root, data) {
   }
   function move(step) {
     const sel = state.dir === "across"
-      ? { ...state.sel, col: Math.min(SIZE - 1, Math.max(0, state.sel.col + step)) }
-      : { ...state.sel, row: Math.min(SIZE - 1, Math.max(0, state.sel.row + step)) };
+      ? { ...state.sel, col: Math.min(COLS - 1, Math.max(0, state.sel.col + step)) }
+      : { ...state.sel, row: Math.min(ROWS - 1, Math.max(0, state.sel.row + step)) };
     state = { ...state, sel };
   }
   function typeLetter(ch) {
     if (state.solved) return;
     startTimer();
     state = { ...state, grid: setGrid(state.sel.row, state.sel.col, ch.toUpperCase()) };
-    el.grid.children[state.sel.row * SIZE + state.sel.col]?.classList.remove("wrong");
+    el.grid.children[state.sel.row * COLS + state.sel.col]?.classList.remove("wrong");
     move(1); update(); checkWin();
   }
   function backspace() {
@@ -152,8 +154,8 @@ export function renderCrossword(root, data) {
     if (!li) return;
     const n = Number(li.dataset.num);
     const dir = li.dataset.dir;
-    state = { ...state, dir, sel: dir === "across" ? { row: n - SIZE, col: 0 } : { row: 0, col: n - 1 }, placed: true };
-    if (dir === "across" && n === 1) state = { ...state, sel: { row: 0, col: 0 } };
+    const sel = dir === "across" ? { row: numbers.across.indexOf(n), col: 0 } : { row: 0, col: numbers.down.indexOf(n) };
+    state = { ...state, dir, sel, placed: true };
     update(); focusEntry();
   });
   el.grid.addEventListener("keydown", handleKey);
@@ -182,7 +184,7 @@ export function renderCrossword(root, data) {
   root.querySelector('[data-action="reveal"]').addEventListener("click", () => {
     const { row, col } = state.sel;
     state = { ...state, revealed: true, grid: setGrid(row, col, solution[row][col]) };
-    el.grid.children[row * SIZE + col]?.classList.remove("wrong");
+    el.grid.children[row * COLS + col]?.classList.remove("wrong");
     update(); checkWin();
   });
   // Revealing everything ends the puzzle, so it asks for a second click rather

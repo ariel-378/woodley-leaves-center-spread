@@ -5,9 +5,9 @@ export const GAME_TYPES = ["connections", "scramble", "bee", "crossword", "words
 export const TYPE_LABELS = { connections: "Connections", scramble: "Word Scramble", bee: "Spelling Bee", crossword: "Mini Crossword", wordsearch: "Word Search", code: "Custom game" };
 export const BEE_OUTER = 6;
 export const BEE_MIN_WORD = 4;
-export const CROSSWORD_SIZE = 5;
-export const CROSSWORD_ACROSS = [1, 6, 7, 8, 9];
-export const CROSSWORD_DOWN = [1, 2, 3, 4, 5];
+export const CROSSWORD_DEFAULT = 5;
+export const CROSSWORD_MIN = 3;
+export const CROSSWORD_MAX = 9;
 export const WORDSEARCH_MIN = 3;
 export const WORDSEARCH_MAX_LETTERS = 16;
 export const CONNECTIONS_GROUPS = 4;
@@ -126,14 +126,32 @@ function validateBee(input) {
   return { errors, data: { center, outer, words: [...new Set(words)] } };
 }
 
+// An all-open grid numbers its squares in reading order: 1 is the top-left,
+// the rest of the top row starts the other Down words, the rest of the first
+// column starts the other Across words.
+export function crosswordNumbers(rowCount, colCount) {
+  return {
+    across: Array.from({ length: rowCount }, (_, r) => (r === 0 ? 1 : colCount + r)),
+    down: Array.from({ length: colCount }, (_, c) => c + 1),
+  };
+}
+
+export function crosswordSize(value) {
+  const n = Number.parseInt(value, 10);
+  return Number.isFinite(n) ? Math.min(CROSSWORD_MAX, Math.max(CROSSWORD_MIN, n)) : CROSSWORD_DEFAULT;
+}
+
 function validateCrossword(input) {
   const errors = [];
-  const rows = Array.from({ length: CROSSWORD_SIZE }, (_, i) => String(input?.cwRows?.[i] || "").trim().toUpperCase());
-  if (!rows.every((r) => new RegExp(`^[A-Z]{${CROSSWORD_SIZE}}$`).test(r))) errors.push(`Each row must be exactly ${CROSSWORD_SIZE} letters.`);
-  const clueMap = (numbers, list) => Object.fromEntries(numbers.map((n, i) => [n, String(list?.[i] || "").trim()]).filter(([, v]) => v));
-  const across = clueMap(CROSSWORD_ACROSS, input?.cwAcross);
-  const down = clueMap(CROSSWORD_DOWN, input?.cwDown);
-  if (Object.keys(across).length !== CROSSWORD_SIZE || Object.keys(down).length !== CROSSWORD_SIZE) errors.push("Fill in all five Across and all five Down clues.");
+  const rowCount = crosswordSize(input?.cwRowCount);
+  const colCount = crosswordSize(input?.cwColCount);
+  const rows = Array.from({ length: rowCount }, (_, i) => String(input?.cwRows?.[i] || "").trim().toUpperCase());
+  if (!rows.every((r) => new RegExp(`^[A-Z]{${colCount}}$`).test(r))) errors.push(`Each of the ${rowCount} rows must be exactly ${colCount} letters.`);
+  const numbers = crosswordNumbers(rowCount, colCount);
+  const clueMap = (list, values) => Object.fromEntries(list.map((n, i) => [n, String(values?.[i] || "").trim()]).filter(([, v]) => v));
+  const across = clueMap(numbers.across, input?.cwAcross);
+  const down = clueMap(numbers.down, input?.cwDown);
+  if (Object.keys(across).length !== rowCount || Object.keys(down).length !== colCount) errors.push(`Fill in all ${rowCount} Across and all ${colCount} Down clues.`);
   return { errors, data: { rows, across, down } };
 }
 

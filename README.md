@@ -15,7 +15,8 @@ account. If your account is on the editor list you get three buttons:
   - **Word Scramble**: answers one per line; the scramble is generated, or write
     `SCRAMBLED = ANSWER` to choose it.
   - **Spelling Bee**, **Mini Crossword** and **Word Search**: the same built-in
-    puzzles as the main Woodley Leaves site, with the same forms.
+    puzzles as the main Woodley Leaves site. The crossword can be any size from
+    3×3 to 9×9, rows and columns chosen separately.
   - **Custom game**: paste a self-contained game (HTML, CSS and JavaScript in
     one block). It runs in a sandbox and can't touch the rest of the site. The
     box opens with a working example.

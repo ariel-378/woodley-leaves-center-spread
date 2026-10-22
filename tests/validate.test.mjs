@@ -141,6 +141,24 @@ test("validateGame builds a spelling bee and rejects words that break the rules"
   assert.ok(dup.errors.some((e) => e.includes("different")));
 });
 
+test("crosswordNumbers numbers an all-open grid in reading order", async () => {
+  const { crosswordNumbers, crosswordSize } = await import("../validate.js");
+  assert.deepEqual(crosswordNumbers(5, 5), { across: [1, 6, 7, 8, 9], down: [1, 2, 3, 4, 5] });
+  assert.deepEqual(crosswordNumbers(3, 4), { across: [1, 5, 6], down: [1, 2, 3, 4] });
+  assert.equal(crosswordSize("7"), 7);
+  assert.equal(crosswordSize("99"), 9);
+  assert.equal(crosswordSize(""), 5);
+});
+
+test("validateGame accepts a 3 by 4 crossword with matching clue counts", () => {
+  const res = validateGame({ ...base, type: "crossword", cwRowCount: 3, cwColCount: 4, cwRows: ["acid", "lore", "eons"], cwAcross: ["a", "b", "c"], cwDown: ["d", "e", "f", "g"] });
+  assert.equal(res.ok, true, res.errors.join(" "));
+  assert.deepEqual(Object.keys(res.game.data.across), ["1", "5", "6"]);
+  assert.deepEqual(Object.keys(res.game.data.down), ["1", "2", "3", "4"]);
+  const wrongWidth = validateGame({ ...base, type: "crossword", cwRowCount: 3, cwColCount: 4, cwRows: ["acid", "lor", "eons"], cwAcross: ["a", "b", "c"], cwDown: ["d", "e", "f", "g"] });
+  assert.ok(wrongWidth.errors.some((e) => e.includes("4 letters")));
+});
+
 test("validateGame builds a crossword and needs five rows and ten clues", () => {
   const rows = ["BASIC", "ARENA", "SEEDS", "INDIE", "CASES"];
   const clues = ["a", "b", "c", "d", "e"];

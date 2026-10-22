@@ -62,7 +62,7 @@
 .cs-group-blue { border-left-color: #9fc3ec; }
 .cs-group-purple { border-left-color: #c9a7e6; }
 .cs-note { font-size: 12.5px; color: #555; margin: 0; line-height: 1.5; }
-.cs-grid-rows { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.cs-grid-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-bottom: 10px; }
 .cs-grid-rows input, .cs-letters { font-family: ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: 4px; text-align: center; }
 .cs-clues { display: grid; gap: 6px; }
 @media (max-width: 520px) { .cs-grid-rows { grid-template-columns: 1fr 1fr; } }
