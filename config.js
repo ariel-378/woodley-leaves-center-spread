@@ -11,14 +11,13 @@ window.CS_CONFIG = {
   // Paste the web-app config from the Firebase console here (see SETUP.md).
   // While it is null the site runs in DEMO MODE: games and editors live only in
   // this browser, and "Editor access" asks for an email instead of Google.
-  firebase: const firebaseConfig = {
-  apiKey: "AIzaSyCnDOxHJ5GodcktcMjz15GpYW-HzwBvEyI",
-  authDomain: "wlcenterspread.firebaseapp.com",
-  projectId: "wlcenterspread",
-  storageBucket: "wlcenterspread.firebasestorage.app",
-  messagingSenderId: "41593826716",
-  appId: "1:41593826716:web:52815cb779f94b6b34ac59"
-};
-
+  firebase: {
+    apiKey: "AIzaSyCnDOxHJ5GodcktcMjz15GpYW-HzwBvEyI",
+    authDomain: "wlcenterspread.firebaseapp.com",
+    projectId: "wlcenterspread",
+    storageBucket: "wlcenterspread.firebasestorage.app",
+    messagingSenderId: "41593826716",
+    appId: "1:41593826716:web:52815cb779f94b6b34ac59"
+  },
 };
  
