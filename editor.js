@@ -2,7 +2,7 @@
 // demo-mode sign-in. All built on <dialog>, so focus and Escape just work.
 import { CSStore } from "./store.js";
 import { validateGame, isValidEmail, normalizeEmail, GAME_TYPES, TYPE_LABELS, CONNECTIONS_GROUPS } from "./validate.js";
-import { EXAMPLE_CODE } from "./games/code.js";
+import { EXAMPLE_CODE, renderCode } from "./games/code.js";
 import { escapeHtml } from "./games/dom.js";
 
 const TOAST_MS = 4500;
@@ -96,6 +96,13 @@ const GAME_FORM = `
       <p class="cs-note">Paste a self-contained game: its HTML, CSS and JavaScript in one block. It runs in a sandbox and can't touch the rest of the site. The box starts with a working example.</p>
       <label>Height in pixels <input name="height" type="number" min="200" max="2000" value="500"></label>
       <label>Game code <textarea name="code" rows="14" spellcheck="false"></textarea></label>
+      <div class="cs-form-actions cs-form-actions-start">
+        <button type="button" class="cs-btn" data-preview>Preview</button>
+      </div>
+      <div class="cs-code-preview" hidden>
+        <p class="cs-note">This is how readers will see it. Change the code and press Refresh preview to see the result.</p>
+        <div class="cs-code-preview-frame"></div>
+      </div>
     </fieldset>
 
     <p class="cs-form-error" role="alert"></p>
@@ -138,6 +145,20 @@ function readGameForm(form, existingId) {
   };
 }
 
+// Runs the pasted code in the reader's sandbox, inside the form, so an editor
+// can see the game before it is saved.
+function previewCode(form) {
+  const preview = form.querySelector(".cs-code-preview");
+  const error = form.querySelector(".cs-form-error");
+  const result = validateGame({ ...readGameForm(form, "preview"), type: "code", title: "preview", editionLabel: "preview", editionDate: "2000-01-01" });
+  if (!result.ok) { error.innerHTML = result.errors.map(escapeHtml).join("<br>"); return; }
+  error.textContent = "";
+  renderCode(preview.querySelector(".cs-code-preview-frame"), result.game.data);
+  preview.hidden = false;
+  form.querySelector("[data-preview]").textContent = "Refresh preview";
+  preview.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
 function showPanel(form) {
   const type = form.elements.type.value;
   form.querySelectorAll("[data-type-panel]").forEach((p) => { p.hidden = p.dataset.typePanel !== type; });
@@ -151,6 +172,7 @@ function openGameForm(game) {
   fillGameForm(form, game);
   showPanel(form);
   form.elements.type.addEventListener("change", () => showPanel(form));
+  form.querySelector("[data-preview]").addEventListener("click", () => previewCode(form));
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const result = validateGame(readGameForm(form, game?.id));
